@@ -25,6 +25,32 @@ export type HasManyThroughResolvedDefinition = HasManyDefinition & {
  * @param relationMeta - hasManyThrough metadata to resolve
  * @param throughInstances - Instances of through entities used to constrain the target
  * @internal
+ *
+ * @example
+ * ```ts
+ * const resolvedMetadata = {
+ *  // .. other props
+ *  keyFrom: 'id',
+ *  keyTo: 'id',
+ *  through: {
+ *    model: () => CategoryProductLink,
+ *    keyFrom: 'categoryId',
+ *    keyTo: 'productId',
+ *  },
+ * };
+
+ * createTargetConstraint(resolvedMetadata, [
+      {
+        id: 2,
+        categoryId: 2,
+        productId: 8,
+      }, {
+        id: 2,
+        categoryId: 2,
+        productId: 9,
+      }
+  ]);
+ * ```
  */
 export function createTargetConstraint<
   Target extends Entity,
@@ -47,29 +73,35 @@ export function createTargetConstraint<
 }
 
 /**
- * Creates constraint used to query through
+ * Creates constraint used to query through model
+ *
  * @param relationMeta - hasManyThrough metadata to resolve
  * @param fkValue - Value of the foreign key of the source model used to constrain through
  * @param targetInstance - Instance of target entity used to constrain through
  * @internal
+ *
+ * @example
+ * ```ts
+ * const resolvedMetadata = {
+ *  // .. other props
+ *  keyFrom: 'id',
+ *  keyTo: 'id',
+ *  through: {
+ *    model: () => CategoryProductLink,
+ *    keyFrom: 'categoryId',
+ *    keyTo: 'productId',
+ *  },
+ * };
+ * createThroughConstraint(resolvedMetadata, 1);
+ * ```
  */
-export function createThroughConstraint<
-  Target extends Entity,
-  Through extends Entity,
-  ForeignKeyType
->(
+export function createThroughConstraint<Through extends Entity, ForeignKeyType>(
   relationMeta: HasManyThroughResolvedDefinition,
   fkValue: ForeignKeyType,
-  targetInstance?: Target,
 ): DataObject<Through> {
-  const targetPrimaryKey = relationMeta.keyTo;
-  const targetFkName = relationMeta.through.keyTo;
   const sourceFkName = relationMeta.through.keyFrom;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const constraint: any = {[sourceFkName]: fkValue};
-  if (targetInstance) {
-    constraint[targetFkName] = targetInstance[targetPrimaryKey as keyof Target];
-  }
   return constraint;
 }
 
