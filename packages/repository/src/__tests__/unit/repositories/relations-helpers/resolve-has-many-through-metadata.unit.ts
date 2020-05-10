@@ -21,28 +21,14 @@ import {
 
 describe('HasManyThroughHelpers', () => {
   context('createThroughConstraint', () => {
-    it('can create constraint with both foreign keys', () => {
-      const p1 = createProduct({id: 9});
-      const resolved = {
-        name: 'products',
-        type: 'hasMany',
-        targetsMany: true,
-        source: Category,
-        keyFrom: 'id',
-        target: () => Product,
-        keyTo: 'id',
-        through: {
-          model: () => CategoryProductLink,
-          keyFrom: 'categoryId',
-          keyTo: 'productId',
-        },
-      } as HasManyThroughResolvedDefinition;
-      const result = createThroughConstraint(resolved, 1, p1);
-      expect(result).to.containEql({categoryId: 1, productId: 9});
+    it('can create constraint for searching through models', () => {
+      const resolved = resolvedMetadata as HasManyThroughResolvedDefinition;
+      const result = createThroughConstraint(resolved, 1);
+      expect(result).to.containEql({categoryId: 1});
     });
   });
   context('createTargetConstraint', () => {
-    it('', () => {
+    it('can create constraint for searching target models', () => {
       const through1 = createCategoryProductLink({
         id: 1,
         categoryId: 2,
@@ -53,20 +39,7 @@ describe('HasManyThroughHelpers', () => {
         categoryId: 2,
         productId: 8,
       });
-      const resolved = {
-        name: 'products',
-        type: 'hasMany',
-        targetsMany: true,
-        source: Category,
-        keyFrom: 'id',
-        target: () => Product,
-        keyTo: 'id',
-        through: {
-          model: () => CategoryProductLink,
-          keyFrom: 'categoryId',
-          keyTo: 'productId',
-        },
-      } as HasManyThroughResolvedDefinition;
+      const resolved = resolvedMetadata as HasManyThroughResolvedDefinition;
 
       // single through model
       let result = createTargetConstraint(resolved, [through1]);
@@ -268,8 +241,5 @@ describe('HasManyThroughHelpers', () => {
 
   function createCategoryProductLink(properties: Partial<CategoryProductLink>) {
     return new CategoryProductLink(properties);
-  }
-  function createProduct(properties: Partial<Product>) {
-    return new Product(properties);
   }
 });
