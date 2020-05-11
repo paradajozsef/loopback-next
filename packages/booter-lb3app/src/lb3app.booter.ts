@@ -5,12 +5,7 @@
 
 import {BootBindings, Booter} from '@loopback/boot';
 import {CoreBindings, inject} from '@loopback/core';
-import {
-  ExpressRequestHandler,
-  OpenApiSpec,
-  rebaseOpenApiSpec,
-  RestApplication,
-} from '@loopback/rest';
+import {ExpressRequestHandler, OpenApiSpec, rebaseOpenApiSpec, RestApplication} from '@loopback/rest';
 import debugFactory from 'debug';
 import {Application as ExpressApplication} from 'express';
 import pEvent from 'p-event';
@@ -82,17 +77,6 @@ export class Lb3AppBooter implements Booter {
         this.app.bind(`lb3-models.${k}`).to(model).tag('lb3-model');
         visitedModels.add(model);
       }
-    }
-
-    const models = lb3App.models;
-    if (models) {
-      const visited: unknown[] = [];
-      Object.keys(models).forEach(key => {
-        const model = models[key];
-        if (visited.includes(model)) return;
-        visited.push(model);
-        this.app.bind(`lb3-models.${key}`).to(model).tag('lb3-model');
-      });
     }
 
     // TODO(bajtos) Listen for the following events to update the OpenAPI spec:

@@ -6,12 +6,7 @@
 import {OpenApiSpec, OperationObject} from '@loopback/rest';
 import {Client, expect} from '@loopback/testlab';
 import _ from 'lodash';
-import {
-  CoffeeApplication,
-  givenCoffeeShop,
-  givenUser,
-  setupApplication,
-} from '../test-helper';
+import {CoffeeApplication, givenCoffeeShop, givenUser, setupApplication} from '../test-helper';
 const lb3app = require('../../../fixtures/lb3app/server/server');
 
 describe('booter-lb3app', () => {
