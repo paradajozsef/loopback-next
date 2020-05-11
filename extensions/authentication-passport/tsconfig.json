@@ -7,9 +7,13 @@
     "composite": true
   },
   "include": [
-    "src"
+    "src",
+    "../../fixtures/mock-oauth2-provider/src/mock-oauth2-social-app.ts"
   ],
   "references": [
+    {
+      "path": "../../fixtures/mock-oauth2-provider/tsconfig.json"
+    },
     {
       "path": "../../packages/authentication/tsconfig.json"
     },
