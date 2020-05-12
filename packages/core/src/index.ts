@@ -20,6 +20,7 @@ export * from '@loopback/context';
 // Export APIs
 export * from './application';
 export * from './component';
+export * from './core.types';
 export * from './extension-point';
 export * from './keys';
 export * from './lifecycle';
