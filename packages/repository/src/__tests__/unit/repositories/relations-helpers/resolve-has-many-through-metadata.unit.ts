@@ -56,13 +56,29 @@ describe('HasManyThroughHelpers', () => {
         type: RelationType.hasOne,
         targetsMany: false,
         source: Category,
-        target: () => Category,
+        target: () => Product,
       };
 
       expect(() => {
         resolveHasManyThroughMetadata(metadata as HasManyDefinition);
       }).to.throw(
         /Invalid hasOne definition for Category#category: relation type must be HasMany/,
+      );
+    });
+
+    it('throws if the through is not provided', async () => {
+      const metadata: unknown = {
+        name: 'category',
+        type: RelationType.hasMany,
+        targetsMany: true,
+        source: Category,
+        target: () => Product,
+      };
+
+      expect(() => {
+        resolveHasManyThroughMetadata(metadata as HasManyDefinition);
+      }).to.throw(
+        /Invalid hasMany definition for Category#category: through must be specified/,
       );
     });
 
@@ -73,7 +89,7 @@ describe('HasManyThroughHelpers', () => {
         targetsMany: true,
         source: Category,
         through: {model: 'random'},
-        target: () => Category,
+        target: () => Product,
       };
 
       expect(() => {
@@ -154,7 +170,7 @@ describe('HasManyThroughHelpers', () => {
         expect(meta).to.eql(resolvedMetadata);
       });
 
-      it('throws if through.keyFrom, through.keyTo, and default foreign key name are not provided in through', async () => {
+      it('throws if through.keyFrom is not provided in through', async () => {
         const metadata = {
           name: 'categories',
           type: RelationType.hasMany,
@@ -174,6 +190,53 @@ describe('HasManyThroughHelpers', () => {
           resolveHasManyThroughMetadata(metadata as HasManyDefinition);
         }).to.throw(
           /Invalid hasMany definition for Category#categories: through model InvalidThrough is missing definition of source foreign key/,
+        );
+      });
+
+      it('throws if through.keyTo is not provided in through', async () => {
+        const metadata = {
+          name: 'categories',
+          type: RelationType.hasMany,
+          targetsMany: true,
+          source: Category,
+          keyFrom: 'id',
+          target: () => Product,
+          keyTo: 'id',
+
+          through: {
+            model: () => InvalidThrough2,
+            keyFrom: 'categoryId',
+          },
+        };
+
+        expect(() => {
+          resolveHasManyThroughMetadata(metadata as HasManyDefinition);
+        }).to.throw(
+          /Invalid hasMany definition for Category#categories: through model InvalidThrough2 is missing definition of target foreign key/,
+        );
+      });
+
+      it('throws if the tarhet model does not have the id property', async () => {
+        const metadata = {
+          name: 'categories',
+          type: RelationType.hasMany,
+          targetsMany: true,
+          source: Category,
+          keyFrom: 'id',
+          target: () => InvalidProduct,
+          keyTo: 'id',
+
+          through: {
+            model: () => CategoryProductLink,
+            keyFrom: 'categoryId',
+            keyTo: 'productId',
+          },
+        };
+
+        expect(() => {
+          resolveHasManyThroughMetadata(metadata as HasManyDefinition);
+        }).to.throw(
+          'Invalid hasMany definition for Category#categories: target model InvalidProduct does not have any primary key (id property)',
         );
       });
     });
@@ -196,6 +259,15 @@ describe('HasManyThroughHelpers', () => {
     id: number;
 
     constructor(data: Partial<Product>) {
+      super(data);
+    }
+  }
+
+  @model()
+  class InvalidProduct extends Entity {
+    @property({id: false})
+    random: number;
+    constructor(data: Partial<InvalidProduct>) {
       super(data);
     }
   }
@@ -238,6 +310,16 @@ describe('HasManyThroughHelpers', () => {
     })
     // lack through.keyFrom
     .addProperty('productId', {type: 'number'});
+
+  class InvalidThrough2 extends Entity {}
+  InvalidThrough2.definition = new ModelDefinition('InvalidThrough2')
+    .addProperty('id', {
+      type: 'number',
+      id: true,
+      required: true,
+    })
+    // lack through.keyTo
+    .addProperty('categoryId', {type: 'number'});
 
   function createCategoryProductLink(properties: Partial<CategoryProductLink>) {
     return new CategoryProductLink(properties);
