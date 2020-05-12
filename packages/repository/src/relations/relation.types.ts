@@ -104,7 +104,7 @@ export interface HasManyDefinition extends RelationDefinitionBase {
     keyFrom?: string;
 
     /**
-     * The foreign key of the target model defined in the through model, e.g. CategoryProductLink#ProductId
+     * The foreign key of the target model defined in the through model, e.g. CategoryProductLink#productId
      */
     keyTo?: string;
   };

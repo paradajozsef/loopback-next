@@ -6,8 +6,8 @@ import {
   HasManyDefinition,
   InvalidRelationError,
   isTypeResolver,
-  RelationType,
 } from '../..';
+import {resolveHasManyMetaHelper} from './has-many.helpers';
 
 const debug = debugFactory('loopback:repository:has-many-through-helpers');
 
@@ -115,22 +115,9 @@ export function createThroughConstraint<Through extends Entity, ForeignKeyType>(
 export function resolveHasManyThroughMetadata(
   relationMeta: HasManyDefinition,
 ): HasManyThroughResolvedDefinition {
-  if ((relationMeta.type as RelationType) !== RelationType.hasMany) {
-    const reason = 'relation type must be HasMany';
-    throw new InvalidRelationError(reason, relationMeta);
-  }
-  if (!relationMeta.source) {
-    const reason = 'source model must be defined';
-    throw new InvalidRelationError(reason, relationMeta);
-  }
-  // if (!isTypeResolver(relationMeta.source)) {
-  //   const reason = 'source must be a type resolver';
-  //   throw new InvalidRelationError(reason, relationMeta);
-  // }
-  if (!isTypeResolver(relationMeta.target)) {
-    const reason = 'target must be a type resolver';
-    throw new InvalidRelationError(reason, relationMeta);
-  }
+  // some checks and relationMeta.keyFrom are handled in here
+  relationMeta = resolveHasManyMetaHelper(relationMeta);
+
   if (!relationMeta.through) {
     const reason = 'through must be specified';
     throw new InvalidRelationError(reason, relationMeta);
@@ -160,10 +147,6 @@ export function resolveHasManyThroughMetadata(
   }
 
   const sourceModel = relationMeta.source;
-  if (!sourceModel || !sourceModel.modelName) {
-    const reason = 'source model must be defined';
-    throw new InvalidRelationError(reason, relationMeta);
-  }
 
   debug(
     'Resolved model %s from given metadata: %o',
@@ -198,16 +181,9 @@ export function resolveHasManyThroughMetadata(
     throw new InvalidRelationError(reason, relationMeta);
   }
 
-  const sourcePrimaryKey =
-    relationMeta.keyFrom ?? sourceModel.definition.idProperties()[0];
-  if (!sourcePrimaryKey || !targetModelProperties[sourcePrimaryKey]) {
-    const reason = `source model ${sourceModel.modelName} does not have any primary key (id property)`;
-    throw new InvalidRelationError(reason, relationMeta);
-  }
-
   return Object.assign(relationMeta, {
     keyTo: targetPrimaryKey,
-    keyFrom: sourcePrimaryKey,
+    keyFrom: relationMeta.keyFrom!,
     through: {
       ...relationMeta.through,
       keyTo: targetFkName,
