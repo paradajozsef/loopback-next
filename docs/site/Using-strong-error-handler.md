@@ -12,7 +12,7 @@ summary:
 In LoopBack 4, the request handling process starts with the app's
 [sequence](https://loopback.io/doc/en/lb4/Sequence.html), a simple class with
 five injected helper methods in the constructor. It is the gatekeeper of all
-requests to the app. Errors are handled by one of the Sequence actions
+requests to the app. Errors are handled by one of the Sequence actions,
 [`reject`](Sequence.md#handling-errors), which calls `strong-error-handler`
 package.
 
@@ -23,12 +23,9 @@ production environments.
 
 ## Supported versions
 
-| Current | Long Term Support | End-of-Life |
-| :-----: | :---------------: | :---------: |
-|   4.x   |        3.x        |     2.x     |
-
-Learn more about our LTS plan in
-[docs](http://loopback.io/doc/en/contrib/Long-term-support.html).
+| Current |
+| :-----: |
+|   3.x   |
 
 ## Installation
 
@@ -36,68 +33,18 @@ Learn more about our LTS plan in
 $ npm install --save strong-error-handler
 ```
 
-## Use
+## Usage
 
-In production mode, the default implementation of `reject`,
-`strong-error-handler` omits details from error responses to prevent leaking
-sensitive information:
+As mentioned above, errors are handled by the `reject` action of the app's
+[sequence](https://loopback.io/doc/en/lb4/Sequence.html). By default,
+implementation of `reject`, `strong-error-handler` omits details from error
+responses to prevent leaking sensitive information.
 
-- For 5xx errors, the output contains only the status code and the status name
-  from the HTTP specification. For example:
-
-  ```json
-  {
-    "error": {
-      "statusCode": 500,
-      "message": "Internal Server Error"
-    }
-  }
-  ```
-
-- For 4xx errors, the output contains the full error message (`error.message`)
-  and the contents of the `details` property (`error.details`) that
-  `ValidationError` typically uses to provide machine-readable details about
-  validation problems. It also includes `error.code` to allow a machine-readable
-  error code to be passed through which could be used, for example, for
-  translation.
-
-  ```json
-  {
-    "error": {
-      "statusCode": 422,
-      "name": "Unprocessable Entity",
-      "message": "Missing required fields",
-      "code": "MISSING_REQUIRED_FIELDS"
-    }
-  }
-  ```
-
-In debug mode, `strong-error-handler` returns full error stack traces and
-internal details of any error objects to the client in the HTTP responses. The
-debug mode can also be enabled by enabling the `debug` flag in by binding:
-
-```ts
-app.bind(RestBindings.ERROR_WRITER_OPTIONS).to({debug: true});
-```
-
-An example error message when the debug mode is enabled:
-
-```json
-{
-  "error": {
-    "statusCode": 500,
-    "name": "Error",
-    "message": "ENOENT: no such file or directory, open '/etc/passwords'",
-    "errno": -2,
-    "syscall": "open",
-    "code": "ENOENT",
-    "path": "/etc/passwords",
-    "stack": "Error: a test error message\n    at Object.openSync (fs.js:434:3)\n    at Object.readFileSync (fs.js:339:35)"
-  }
-}
-```
-
-Check out the [Options](#options) section for more flags.
+`strong-error-handler` also can return full error stack traces and internal
+details of any error objects to the client in the HTTP responses once the
+`debug` flag is set. Please check
+[Sequence - Handling errors](Sequence.md#handling-errors) section for usages and
+examples.
 
 The module also exports `writeErrorToResponse`, a non-middleware flavor of the
 error handler:
@@ -233,22 +180,15 @@ export class MySequence implements SequenceHandler {
 }
 ```
 
-<!-- ### Safe error fields
+### Safe error fields
 
 By default, `strong-error-handler` will only pass through the `name`, `message`
 and `details` properties of an error. Additional error properties may be allowed
 through on 4xx and 5xx status code errors using the `safeFields` option to pass
 in an array of safe field names:
 
-```
-{
-  "final:after": {
-    "strong-error-handler": {
-      "params": {
-        "safeFields": ["errorCode"]
-      }
-    }
-}
+```ts
+app.bind(RestBindings.ERROR_WRITER_OPTIONS).to({safeFields: ['errorCode']});
 ```
 
 Using the above configuration, an error containing an `errorCode` property will
@@ -264,44 +204,12 @@ produce the following response:
 }
 ```
 
-## Migration from old LoopBack error handler
+## Migration from LoopBack 3 error handler
 
-To migrate a LoopBack 2.x application to use `strong-error-handler`:
-
-1. In `package.json` dependencies, remove `"errorhandler": "^x.x.x”,`
-1. Install the new error handler by entering the command:
-<pre>npm install --save strong-error-handler</pre>
-1. In `server/config.json`, remove:
-   <pre>
-   "remoting": {
-     ...
-     "errorHandler": {
-       "disableStackTrace": false
-     }</pre>
-   and replace it with:
-   <pre>
-   "remoting": {
-     ...,
-     "rest": {
-       "handleErrors": false
-     }</pre>
-1. In `server/middleware.json`, remove:
-   <pre>
-   "final:after": {
-     "loopback#errorHandler": {}
-   }</pre>
-   and replace it with:
-   <pre>
-   "final:after": {
-     "strong-error-handler": {}
-   }</pre>
-1. Delete `server/middleware.production.json`.
-1. Create `server/middleware.development.json` containing: <pre> "final:after":
-{ "strong-error-handler": { "params": { "debug": true, "log": true } } }
-</pre>
-
-For more information, see
-[Migrating apps to LoopBack 3.0](http://loopback.io/doc/en/lb3/Migrating-to-3.0.html#update-use-of-rest-error-handler).
+Unlike LoopBack 3’s phase-based middleware routing system, LB4 uses a sequence
+handler that sits infront of a routing table and handles errors. To learn the
+differences and how `strong-error-handler` is being used in LB4, see
+[LB3 vs LB4 request response cycle](LB3-vs-LB4-request-response-cycle.md).
 
 ## Example
 
@@ -340,4 +248,4 @@ The same error generated when `debug: true` :
   name: 'Unprocessable Entity',
   message: 'Missing required fields',
   code: 'MISSING_REQUIRED_FIELDS' }}
-``` -->
+```
