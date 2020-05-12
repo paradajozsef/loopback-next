@@ -7,19 +7,32 @@
 
 const assert = require('assert');
 const ExpressServer = require('../../dist/server').ExpressServer;
+const CoffeeShopApp = require('../../dist/application').CoffeeShopApplication;
 require('should');
 
-describe('LoopBack 3 style integration tests', function () {
-  let app;
-  let CoffeeShop;
+let CoffeeShop, app;
 
+describe('LoopBack 3 style integration tests - boot from LB4 app', function () {
   before(async function () {
+    app = new CoffeeShopApp();
+    await app.boot();
+    await app.start();
+    CoffeeShop = app.getSync('lb3-models.CoffeeShop');
+  });
+
+  after(async () => {
+    await CoffeeShop.destroyAll({ name: 'Nook Shop' });
+    await app.stop();
+  });
+
+  runTests();
+})
+
+describe('LoopBack 3 style integration tests - boot from express', function () {
+  before(async () => {
     app = new ExpressServer();
     await app.boot();
     await app.start();
-  });
-
-  before(() => {
     CoffeeShop = app.lbApp.getSync('lb3-models.CoffeeShop');
   });
 
@@ -27,8 +40,12 @@ describe('LoopBack 3 style integration tests', function () {
     await app.stop();
   });
 
+  runTests();
+})
+
+function runTests() {
   it('CoffeeShop.find', function (done) {
-    CoffeeShop.find({where: {name: 'Bel Cafe'}}, function (err, shop) {
+    CoffeeShop.find({ where: { name: 'Bel Cafe' } }, function (err, shop) {
       shop[0].__data.name.should.be.equal('Bel Cafe');
       shop[0].__data.city.should.be.equal('Vancouver');
     });
@@ -37,7 +54,7 @@ describe('LoopBack 3 style integration tests', function () {
 
   it('CoffeeShop.count', function (done) {
     CoffeeShop.count({}, function (err, count) {
-      assert.equal(count, 5);
+      assert.equal(count, 6);
     });
     done();
   });
@@ -55,4 +72,4 @@ describe('LoopBack 3 style integration tests', function () {
     );
     done();
   });
-});
+}

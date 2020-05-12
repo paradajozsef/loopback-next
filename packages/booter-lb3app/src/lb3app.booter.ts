@@ -5,7 +5,12 @@
 
 import {BootBindings, Booter} from '@loopback/boot';
 import {CoreBindings, inject} from '@loopback/core';
-import {ExpressRequestHandler, OpenApiSpec, rebaseOpenApiSpec, RestApplication} from '@loopback/rest';
+import {
+  ExpressRequestHandler,
+  OpenApiSpec,
+  rebaseOpenApiSpec,
+  RestApplication,
+} from '@loopback/rest';
 import debugFactory from 'debug';
 import {Application as ExpressApplication} from 'express';
 import pEvent from 'p-event';
