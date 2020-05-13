@@ -21,11 +21,7 @@ package.
 This package is an error handler for use in both development (debug) and
 production environments.
 
-## Supported versions
-
-| Current |
-| :-----: |
-|   3.x   |
+LB4 apps require 3.x versions of `strong-error-handler`.
 
 ## Installation
 
@@ -68,7 +64,7 @@ http
   .listen(3000);
 ```
 
-In general, `strong-error-handler` must be the last middleware function
+In general, `strong-error-handler` must be the last middleware function to be
 registered.
 
 The above configuration will log errors to the server console, but not return
@@ -105,7 +101,7 @@ The content type of the response depends on the request's `Accepts` header.
 - For Accepts header `html` or `text/html`, the response content type is HTML.
 - For Accepts header `xml` or `text/xml`, the response content type is XML.
 
-_There are plans to support other formats such as Plain-text._
+_There are plans to support other formats such as text/plain._
 
 ## Options
 
@@ -207,7 +203,7 @@ produce the following response:
 ## Migration from LoopBack 3 error handler
 
 Unlike LoopBack 3’s phase-based middleware routing system, LB4 uses a sequence
-handler that sits infront of a routing table and handles errors. To learn the
+handler that sits in front of a routing table and handles errors. To learn the
 differences and how `strong-error-handler` is being used in LB4, see
 [LB3 vs LB4 request response cycle](LB3-vs-LB4-request-response-cycle.md).
 
