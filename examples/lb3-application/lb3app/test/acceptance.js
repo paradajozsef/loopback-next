@@ -4,10 +4,10 @@
 // License text available at https://opensource.org/licenses/MIT
 
 'use strict';
-const { supertest } = require('@loopback/testlab');
+const {supertest} = require('@loopback/testlab');
 const assert = require('assert');
-const { ExpressServer } = require('../../dist/server');
-const { CoffeeShopApplication } = require('../../dist/application');
+const {ExpressServer} = require('../../dist/server');
+const {CoffeeShopApplication} = require('../../dist/application');
 require('should');
 
 let app;
@@ -15,7 +15,7 @@ let app;
 function jsonForLB4(verb, url) {
   // use the lb4 app's rest server
   return supertest(app.restServer.url)
-  [verb](url)
+    [verb](url)
     .set('Content-Type', 'application/json')
     .set('Accept', 'application/json')
     .expect('Content-Type', /json/);
@@ -25,7 +25,7 @@ function jsonForExpressApp(verb, url) {
   // use the express server, it mounts LoopBack 3 apis to
   // base path '/api'
   return supertest(app.server)
-  [verb]('/api' + url)
+    [verb]('/api' + url)
     .set('Content-Type', 'application/json')
     .set('Accept', 'application/json')
     .expect('Content-Type', /json/);
@@ -34,7 +34,7 @@ function jsonForExpressApp(verb, url) {
 function jsonForExternal(verb, url) {
   // use the express server, its external apis doesn't have base path
   return supertest(app.server)
-  [verb](url)
+    [verb](url)
     .set('Content-Type', 'application/json')
     .set('Accept', 'application/json')
     .expect('Content-Type', /json/);
@@ -95,10 +95,7 @@ function runTests(request) {
     });
 
     it("gets the CoffeeShop's status", function (done) {
-      request('get', '/CoffeeShops/status').expect(200, function (
-        err,
-        res,
-      ) {
+      request('get', '/CoffeeShops/status').expect(200, function (err, res) {
         res.body.status.should.be.equalOneOf(
           'We are open for business.',
           'Sorry, we are closed. Open daily from 6am to 8pm.',

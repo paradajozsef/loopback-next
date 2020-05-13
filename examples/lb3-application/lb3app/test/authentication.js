@@ -5,10 +5,10 @@
 
 'use strict';
 const lb3App = require('../server/server');
-const { supertest } = require('@loopback/testlab');
+const {supertest} = require('@loopback/testlab');
 const assert = require('assert');
-const { ExpressServer } = require('../../dist/server');
-const { CoffeeShopApplication } = require('../../dist/application');
+const {ExpressServer} = require('../../dist/server');
+const {CoffeeShopApplication} = require('../../dist/application');
 require('should');
 
 let app, User;
@@ -16,7 +16,7 @@ let app, User;
 function jsonForLB4(verb, url) {
   // use the lb4 app's rest server
   return supertest(app.restServer.url)
-  [verb](url)
+    [verb](url)
     .set('Content-Type', 'application/json')
     .set('Accept', 'application/json')
     .expect('Content-Type', /json/);
@@ -25,7 +25,7 @@ function jsonForLB4(verb, url) {
 function jsonForExpressApp(verb, url) {
   // use the express server, it mounts apis to base path '/api'
   return supertest(app.server)
-  [verb]('/api' + url)
+    [verb]('/api' + url)
     .set('Content-Type', 'application/json')
     .set('Accept', 'application/json')
     .expect('Content-Type', /json/);
@@ -78,7 +78,7 @@ function runTests(request) {
   it('creates a User and logs them in and out', function (done) {
     // create user
     request('post', '/users')
-      .send({ email: 'new@email.com', password: 'L00pBack!' })
+      .send({email: 'new@email.com', password: 'L00pBack!'})
       .expect(200, function (err, user) {
         assert.equal(user.body.email, 'new@email.com');
         // login
@@ -88,12 +88,7 @@ function runTests(request) {
             password: 'L00pBack!',
           })
           .expect(200, function (err2, token) {
-            token.body.should.have.properties(
-              'ttl',
-              'userId',
-              'created',
-              'id',
-            );
+            token.body.should.have.properties('ttl', 'userId', 'created', 'id');
             assert.equal(token.body.userId, user.body.id);
             // logout
             request(
@@ -114,26 +109,26 @@ function runTests(request) {
 
   it('makes an authenticated request', function (done) {
     // create user
-    User.create({ email: 'new@gmail.com', password: 'L00pBack!' }, function (
+    User.create({email: 'new@gmail.com', password: 'L00pBack!'}, function (
       err,
       user,
     ) {
       user.email.should.be.equal('new@gmail.com');
       // login
-      User.login({ email: 'new@gmail.com', password: 'L00pBack!' }, function (
+      User.login({email: 'new@gmail.com', password: 'L00pBack!'}, function (
         err2,
         token,
       ) {
         assert.equal(typeof token, 'object');
         assert.equal(token.userId, user.id);
         // authenticate user with token
-        request(
-          'get',
-          `/CoffeeShops/greet?access_token=${token.id}`,
-        ).expect(200, function (err3, res) {
-          res.body.greeting.should.be.equal('Hello from this Coffee Shop');
-          done();
-        });
+        request('get', `/CoffeeShops/greet?access_token=${token.id}`).expect(
+          200,
+          function (err3, res) {
+            res.body.greeting.should.be.equal('Hello from this Coffee Shop');
+            done();
+          },
+        );
       });
     });
   });

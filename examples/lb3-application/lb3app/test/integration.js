@@ -17,23 +17,23 @@ describe('LoopBack 3 style integration tests - boot from LB4 app', function () {
     app = new CoffeeShopApp();
     await app.boot();
     await app.start();
-    CoffeeShop = app.getSync('lb3-models.CoffeeShop');
+    CoffeeShop = await app.get('lb3-models.CoffeeShop');
   });
 
   after(async () => {
-    await CoffeeShop.destroyAll({ name: 'Nook Shop' });
+    await CoffeeShop.destroyAll({name: 'Nook Shop'});
     await app.stop();
   });
 
   runTests();
-})
+});
 
 describe('LoopBack 3 style integration tests - boot from express', function () {
   before(async () => {
     app = new ExpressServer();
     await app.boot();
     await app.start();
-    CoffeeShop = app.lbApp.getSync('lb3-models.CoffeeShop');
+    CoffeeShop = await app.lbApp.get('lb3-models.CoffeeShop');
   });
 
   after(async () => {
@@ -41,11 +41,11 @@ describe('LoopBack 3 style integration tests - boot from express', function () {
   });
 
   runTests();
-})
+});
 
 function runTests() {
   it('CoffeeShop.find', function (done) {
-    CoffeeShop.find({ where: { name: 'Bel Cafe' } }, function (err, shop) {
+    CoffeeShop.find({where: {name: 'Bel Cafe'}}, function (err, shop) {
       shop[0].__data.name.should.be.equal('Bel Cafe');
       shop[0].__data.city.should.be.equal('Vancouver');
     });
